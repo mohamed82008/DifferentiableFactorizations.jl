@@ -3,11 +3,22 @@ uuid = "f7876f94-e99c-4755-b0c6-59dc4ff4934d"
 authors = ["Mohamed Tarek <mohamed82008@gmail.com> and contributors"]
 version = "0.1.0"
 
+[deps]
+ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+ComponentArrays = "b0b7db55-cfe3-40fc-9ded-d10e2dbeff66"
+ImplicitDifferentiation = "57b37032-215b-411a-8a7c-41a003a55207"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+
 [compat]
+ChainRulesCore = "1"
+ComponentArrays = "0.11, 0.12"
+ImplicitDifferentiation = "0.2"
 julia = "1"
 
 [extras]
+FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [targets]
-test = ["Test"]
+test = ["FiniteDifferences", "Test", "Zygote"]
