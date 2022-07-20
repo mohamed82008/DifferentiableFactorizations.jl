@@ -64,6 +64,18 @@ end
     zjac2 = Zygote.jacobian(f2, AB)[1]
     fjac2 = FiniteDifferences.jacobian(central_fdm(5, 1), f2, AB)[1]
     @test norm(zjac2 - fjac2) < 1e-9
+
+    f3(A) = diff_eigen(A' * A).s
+    zjac3 = Zygote.jacobian(f3, A)[1]
+    fjac3 = FiniteDifferences.jacobian(central_fdm(5, 1), f3, A)[1]
+    @test norm(zjac3 - fjac3) < 1e-9
+
+    # Seems eigen does not guarantee differentiability of the output V without matrix B - the FiniteDifferences jacobian has large numbers
+
+    # f4(A) = vec(diff_eigen(A' * A + 5I).V)
+    # zjac4 = Zygote.jacobian(f4, A)[1]
+    # fjac4 = FiniteDifferences.jacobian(central_fdm(5, 1), f4, A)[1]
+    # @test norm(zjac4 - fjac4) < 1e-9
 end
 
 @testset "SVD" begin

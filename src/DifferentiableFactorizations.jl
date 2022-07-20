@@ -101,10 +101,10 @@ function eigen_forward(AB)
   (; A) = AB
   if hasproperty(AB, :B)
     (; B) = AB
+    eig_res = eigen(A, B)
   else
-    B = I
+    eig_res = eigen(A)
   end
-  eig_res = eigen(A, B)
   s = eig_res.values
   V = eig_res.vectors
   return ComponentVector(; s, V)
