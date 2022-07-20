@@ -1,5 +1,8 @@
 # DifferentiableFactorizations
 
+[![Build Status](https://github.com/mohamed82008/DifferentiableFactorizations.jl/workflows/CI/badge.svg)](https://github.com/mohamed82008/DifferentiableFactorizations.jl/actions)
+[![Coverage](https://codecov.io/gh/mohamed82008/DifferentiableFactorizations.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/mohamed82008/DifferentiableFactorizations.jl)
+
 This package contains a bunch of differentiable matrix factorizations differentiated using the implicit function theorem as implemented in [`ImplicitDifferentiation.jl`](https://github.com/gdalle/ImplicitDifferentiation.jl). The derivatives computed are only correct if the **computed** factorization of the matrix is unique and differentiable. If the implementation does not guarantee uniqueness and differentiability, the solution reported cannot be trusted. Theoretically in some cases, the factorization may only be unique up to a permutation or a sign flip. In those cases if the implementation guarantees a unique and differentiable output, the derivatives reported are still valid. This can be experimentally tested by comparing against finite difference.
 
 ## Installation
