@@ -17,8 +17,9 @@ julia = "1"
 
 [extras]
 FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [targets]
-test = ["FiniteDifferences", "Test", "Zygote"]
+test = ["FiniteDifferences", "Random", "Test", "Zygote"]
