@@ -1,6 +1,6 @@
 module DifferentiableFactorizations
 
-export diff_qr, diff_cholesky, diff_lu, diff_eigen, diff_svd
+export diff_qr, diff_cholesky, diff_lu, diff_eigen, diff_svd, diff_schur
 
 using LinearAlgebra, ImplicitDifferentiation, ComponentArrays, ChainRulesCore
 
@@ -118,6 +118,56 @@ end
 function diff_eigen(A, B)
   (; s, V) = _diff_eigen(comp_vec(A, B))
   return (; s , V)
+end
+
+function schur_conditions(A, Z_T)
+  (; Z, T) = Z_T
+  return vcat(
+    vec(Z' * A * Z - T),
+    vec(Z' * Z - I + LowerTriangular(T) - Diagonal(T)),
+  )
+end
+function schur_forward(A)
+  schur_res = schur(A)
+  (; Z, T) = schur_res
+  return ComponentVector(; Z, T)
+end
+const _diff_schur = ImplicitFunction(schur_forward, schur_conditions)
+
+function bidiag(v1, v2)
+  return Bidiagonal(v1, v2, :L)
+end
+function ChainRulesCore.rrule(::typeof(bidiag), v1, v2)
+  bidiag(v1, v2), Δ -> begin
+    NoTangent(), diag(Δ), diag(Δ, -1)
+  end
+end
+
+function gen_schur_conditions(AB, left_right_S_T)
+  (; left, right, S, T) = left_right_S_T
+  (; A, B) = AB
+  return vcat(
+    vec(left * S * right' - A),
+    vec(left * T * right' - B),
+    vec(UpperTriangular(left' * left) - I + LowerTriangular(S) - bidiag(diag(S), diag(S, -1) .+ (diag(S, -1) .* diag(T, 1)))),
+    vec(UpperTriangular(right' * right) - I + LowerTriangular(T) - Diagonal(T)),
+  )
+end
+function gen_schur_forward(AB)
+  (; A, B) = AB
+  schur_res = schur(A, B)
+  (; left, right, S, T) = schur_res
+  return ComponentVector(; left, right, S, T)
+end
+const _diff_gen_schur = ImplicitFunction(gen_schur_forward, gen_schur_conditions)
+
+function diff_schur(A, B)
+  (; left, right, S, T) = _diff_gen_schur(comp_vec(A, B))
+  return (; left, right, S, T)
+end
+function diff_schur(A)
+  (; Z, T) = _diff_schur(A)
+  return (; Z, T)
 end
 
 # SVD
