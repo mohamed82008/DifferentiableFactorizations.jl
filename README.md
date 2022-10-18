@@ -97,3 +97,30 @@ B = rand(3, 3)
 f(B) = vec(diff_eigen(A' * A, B' * B + 2I).V)
 zjac = Zygote.jacobian(f, B)[1]
 ```
+
+## Schur decomposition
+
+```julia
+A = rand(3, 3)
+
+# Forward pass: Z * T * Z' ≈ A + A'
+(; Z, T) = diff_schur(A + A')
+
+# Differentiation
+f(A) = vec(diff_schur(A + A').T)
+zjac = Zygote.jacobian(f, A)[1]
+```
+
+## Generalized Schur decomposition
+
+```julia
+A = rand(3, 3)
+B = rand(3, 3)
+
+# Forward pass: left * S * right' ≈ A + A' and left * T * right' ≈ B + B'
+(; left, right, S, T) = diff_schur(A + A', B + B')
+
+# Differentiation
+f(B) = vec(diff_schur(A + A', B + B').T)
+zjac = Zygote.jacobian(f, B)[1]
+```
