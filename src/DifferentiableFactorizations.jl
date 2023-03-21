@@ -1,6 +1,6 @@
 module DifferentiableFactorizations
 
-export diff_qr, diff_cholesky, diff_lu, diff_eigen, diff_svd, diff_schur
+export diff_qr, diff_cholesky, diff_lu, diff_eigen, diff_svd, diff_schur, diff_qr_dev
 
 using LinearAlgebra, ImplicitDifferentiation, ComponentArrays, ChainRulesCore
 
@@ -22,6 +22,39 @@ end
 const _diff_qr = ImplicitFunction(qr_forward, qr_conditions)
 function diff_qr(A)
   (; Q, R) = _diff_qr(A)
+  return (; Q, R)
+end
+
+# QR dev
+function qr_conditions_dev(A, x)
+  (; Q, R) = x
+  m, n = size(A, 1), size(A, 2)
+  res_A = copy(A)
+  res_R = Matrix{eltype(A)}(I, n, n)
+  for i in 1:m
+    for j in 1:n
+      for k in 1:n
+        res_A[i, j] -= Q[i, k] * R[k, j]
+        if i == 1 && j < k                                                                                                     
+          res_R[k, j] += R[k, j]
+        end
+        if j <= k
+          res_R[j, k] -= Q[i, k] * Q[i, j]
+        end
+      end
+    end
+  end
+  return vcat(vec(res_A), vec(res_R))
+end
+function qr_forward_dev(A)
+  qr_res = qr(A)
+  Q = copy(qr_res.Q[:, 1:size(A, 2)])
+  (; R) = qr_res
+  return ComponentVector(; Q, R)
+end
+const _diff_qr_dev = ImplicitFunction(qr_forward_dev, qr_conditions_dev)
+function diff_qr_dev(A)
+  (; Q, R) = _diff_qr_dev(A)
   return (; Q, R)
 end
 
