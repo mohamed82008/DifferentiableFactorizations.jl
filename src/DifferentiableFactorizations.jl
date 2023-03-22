@@ -27,6 +27,7 @@ end
 
 # QR dev
 function qr_conditions_dev(A, x)
+  (; Q, R) = x
   m, n = size(A, 1), size(A, 2)
   res = similar(A, m + n, n)
   res_A = view(res, 1:m, :)
