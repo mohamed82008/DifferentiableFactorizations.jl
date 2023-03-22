@@ -27,15 +27,20 @@ end
 
 # QR dev
 function qr_conditions_dev(A, x)
-  (; Q, R) = x
   m, n = size(A, 1), size(A, 2)
-  res_A = copy(A)
-  res_R = Matrix{eltype(A)}(I, n, n)
+  res = similar(A, m + n, n)
+  res_A = view(res, 1:m, :)
+  res_R = view(res, m+1:m+n, :)
+  copyto!(res_A, A)
+  fill!(res_R, 0)
+  for i in 1:min(m, n)
+    res_R[i, i] = 1
+  end
   for i in 1:m
     for j in 1:n
       for k in 1:n
         res_A[i, j] -= Q[i, k] * R[k, j]
-        if i == 1 && j < k                                                                                                     
+        if i == 1 && j < k
           res_R[k, j] += R[k, j]
         end
         if j <= k
@@ -44,7 +49,7 @@ function qr_conditions_dev(A, x)
       end
     end
   end
-  return vcat(vec(res_A), vec(res_R))
+  return vec(res)
 end
 function qr_forward_dev(A)
   qr_res = qr(A)
