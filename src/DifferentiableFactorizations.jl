@@ -6,7 +6,7 @@ using LinearAlgebra, ImplicitDifferentiation, ComponentArrays, ChainRulesCore
 
 # QR
 
-function qr_conditions(A, x)
+function qr_conditions(A, x, _)
   (; Q, R) = x
   return vcat(
     vec(UpperTriangular(Q' * Q) + LowerTriangular(R) - I - Diagonal(R)),
@@ -17,32 +17,32 @@ function qr_forward(A)
   qr_res = qr(A)
   Q = copy(qr_res.Q[:, 1:size(A, 2)])
   (; R) = qr_res
-  return ComponentVector(; Q, R)
+  return ComponentVector(; Q, R), 0
 end
 const _diff_qr = ImplicitFunction(qr_forward, qr_conditions)
 function diff_qr(A)
-  (; Q, R) = _diff_qr(A)
+  (; Q, R) = _diff_qr(A)[1]
   return (; Q, R)
 end
 
 # Cholesky
 
-function cholesky_conditions(A, U)
+function cholesky_conditions(A, U, _)
   return vec(UpperTriangular(U' * U) + LowerTriangular(U) - UpperTriangular(A) - Diagonal(U))
 end
 function cholesky_forward(A)
   ch_res = cholesky(A)
-  return ch_res.U
+  return ch_res.U, 0
 end
 const _diff_cholesky = ImplicitFunction(cholesky_forward, cholesky_conditions)
 function diff_cholesky(A)
-  U = _diff_cholesky(A)
+  U = _diff_cholesky(A)[1]
   return (; L = U', U)
 end
 
 # LU
 
-function lu_conditions(A, LU)
+function lu_conditions(A, LU, _)
   (; L, U, p) = LU
   pint = convert(Vector{Int}, p)
   return vcat(
@@ -54,11 +54,11 @@ end
 function lu_forward(A)
   lu_res = lu(A)
   (; L, U, p) = lu_res
-  return ComponentVector(; L, U, p)
+  return ComponentVector(; L, U, p), 0
 end
 const _diff_lu = ImplicitFunction(lu_forward, lu_conditions)
 function diff_lu(A)
-  temp = _diff_lu(A)
+  temp = _diff_lu(A)[1]
   (; L, U, p) = temp
   return (; L, U, p = convert(Vector{Int}, p))
 end
@@ -84,7 +84,7 @@ function ChainRulesCore.rrule(::typeof(comp_vec), A, B)
   end
 end
 
-function eigen_conditions(AB, sV)
+function eigen_conditions(AB, sV, _)
   (; s, V) = sV
   (; A) = AB
   if hasproperty(AB, :B)
@@ -107,20 +107,20 @@ function eigen_forward(AB)
   end
   s = eig_res.values
   V = eig_res.vectors
-  return ComponentVector(; s, V)
+  return ComponentVector(; s, V), 0
 end
 
 const _diff_eigen = ImplicitFunction(eigen_forward, eigen_conditions)
 function diff_eigen(A)
-  (; s, V) = _diff_eigen(comp_vec(A))
+  (; s, V) = _diff_eigen(comp_vec(A))[1]
   return (; s , V)
 end
 function diff_eigen(A, B)
-  (; s, V) = _diff_eigen(comp_vec(A, B))
+  (; s, V) = _diff_eigen(comp_vec(A, B))[1]
   return (; s , V)
 end
 
-function schur_conditions(A, Z_T)
+function schur_conditions(A, Z_T, _)
   (; Z, T) = Z_T
   return vcat(
     vec(Z' * A * Z - T),
@@ -130,7 +130,7 @@ end
 function schur_forward(A)
   schur_res = schur(A)
   (; Z, T) = schur_res
-  return ComponentVector(; Z, T)
+  return ComponentVector(; Z, T), 0
 end
 const _diff_schur = ImplicitFunction(schur_forward, schur_conditions)
 
@@ -143,7 +143,7 @@ function ChainRulesCore.rrule(::typeof(bidiag), v1, v2)
   end
 end
 
-function gen_schur_conditions(AB, left_right_S_T)
+function gen_schur_conditions(AB, left_right_S_T, _)
   (; left, right, S, T) = left_right_S_T
   (; A, B) = AB
   return vcat(
@@ -157,22 +157,22 @@ function gen_schur_forward(AB)
   (; A, B) = AB
   schur_res = schur(A, B)
   (; left, right, S, T) = schur_res
-  return ComponentVector(; left, right, S, T)
+  return ComponentVector(; left, right, S, T), 0
 end
 const _diff_gen_schur = ImplicitFunction(gen_schur_forward, gen_schur_conditions)
 
 function diff_schur(A, B)
-  (; left, right, S, T) = _diff_gen_schur(comp_vec(A, B))
+  (; left, right, S, T) = _diff_gen_schur(comp_vec(A, B))[1]
   return (; left, right, S, T)
 end
 function diff_schur(A)
-  (; Z, T) = _diff_schur(A)
+  (; Z, T) = _diff_schur(A)[1]
   return (; Z, T)
 end
 
 # SVD
 
-function svd_conditions(A, USV)
+function svd_conditions(A, USV, _)
   (; U, S, V) = USV
   VtV = V' * V
   return vcat(
@@ -184,12 +184,12 @@ end
 function svd_forward(A)
   svd_res = svd(A)
   (; U, S, V) = svd_res
-  return ComponentVector(; U, S, V)
+  return ComponentVector(; U, S, V), 0
 end
 
 const _diff_svd = ImplicitFunction(svd_forward, svd_conditions)
 function diff_svd(A)
-  (; U, S, V) = _diff_svd(A)
+  (; U, S, V) = _diff_svd(A)[1]
   return (; U, S , V)
 end
 
