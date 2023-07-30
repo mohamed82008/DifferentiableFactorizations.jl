@@ -1,11 +1,12 @@
-using DifferentiableFactorizations, Test, Zygote, FiniteDifferences, LinearAlgebra, ComponentArrays, Random
+using DifferentiableFactorizations,
+    Test, Zygote, FiniteDifferences, LinearAlgebra, ComponentArrays, Random
 Random.seed!(1)
 
 const nreps = 3
 const tol = 1e-8
 
 @testset "Cholesky" begin
-    for _ in 1:nreps
+    for _ = 1:nreps
         A = rand(3, 3)
 
         f1(A) = diff_cholesky(A' * A + 2I).U
@@ -21,7 +22,7 @@ const tol = 1e-8
 end
 
 @testset "LU" begin
-    for _ in 1:nreps
+    for _ = 1:nreps
         A = rand(3, 3)
 
         f1(A) = vec(diff_lu(A).U)
@@ -37,9 +38,9 @@ end
 end
 
 @testset "QR" begin
-    for _ in 1:nreps
+    for _ = 1:nreps
         A = rand(3, 2)
-        
+
         f1(A) = vec(diff_qr(A).Q)
         zjac1 = Zygote.jacobian(f1, A)[1]
         fjac1 = FiniteDifferences.jacobian(central_fdm(5, 1), f1, A)[1]
@@ -53,7 +54,7 @@ end
 end
 
 @testset "Eigen" begin
-    for _ in 1:nreps
+    for _ = 1:nreps
         A = rand(3, 3)
         B = rand(3, 3)
         AB = ComponentVector(; A, B)
@@ -91,7 +92,7 @@ end
 end
 
 @testset "SVD" begin
-    for _ in 1:nreps
+    for _ = 1:nreps
         A = rand(3, 3)
 
         f1(A) = diff_svd(A).S
@@ -112,7 +113,7 @@ end
 end
 
 @testset "Schur" begin
-    for _ in 1:nreps
+    for _ = 1:nreps
         A = randn(3, 3)
         A = A' + A + I
         f1(A) = vec(diff_schur(A).Z)
@@ -128,7 +129,7 @@ end
 end
 
 @testset "Generalized Schur" begin
-    for _ in 1:nreps
+    for _ = 1:nreps
         A = randn(3, 3)
         A = A' + A + I
         B = rand(3, 3)
