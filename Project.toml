@@ -1,7 +1,7 @@
 name = "DifferentiableFactorizations"
 uuid = "f7876f94-e99c-4755-b0c6-59dc4ff4934d"
 authors = ["Mohamed Tarek <mohamed82008@gmail.com> and contributors"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
@@ -12,7 +12,7 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 [compat]
 ChainRulesCore = "1"
 ComponentArrays = "0.11, 0.12, 0.13"
-ImplicitDifferentiation = "0.4"
+ImplicitDifferentiation = "0.5"
 julia = "1"
 
 [extras]
