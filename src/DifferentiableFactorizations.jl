@@ -19,7 +19,7 @@ function qr_forward(A)
     (; R) = qr_res
     return ComponentVector(; Q, R)
 end
-const _diff_qr = ImplicitFunction(qr_forward, qr_conditions, DirectLinearSolver())
+const _diff_qr = ImplicitFunction(qr_forward, qr_conditions, DirectLinearSolver(), nothing)
 function diff_qr(A)
     (; Q, R) = _diff_qr(A)
     return (; Q, R)
@@ -37,7 +37,7 @@ function cholesky_forward(A)
     return ch_res.U
 end
 const _diff_cholesky =
-    ImplicitFunction(cholesky_forward, cholesky_conditions, DirectLinearSolver())
+    ImplicitFunction(cholesky_forward, cholesky_conditions, DirectLinearSolver(), nothing)
 function diff_cholesky(A)
     U = _diff_cholesky(A)
     return (; L = U', U)
@@ -57,10 +57,9 @@ function lu_forward(A)
     (; L, U, p) = lu_res
     return ComponentVector(; L, U), p
 end
-const _diff_lu =
-    ImplicitFunction(lu_forward, lu_conditions, DirectLinearSolver(), HandleByproduct())
+const _diff_lu = ImplicitFunction(lu_forward, lu_conditions, DirectLinearSolver(), nothing)
 function diff_lu(A)
-    temp, p = _diff_lu(A, ReturnByproduct())
+    temp, p = _diff_lu(A)
     (; L, U) = temp
     return (; L, U, p)
 end
@@ -109,7 +108,8 @@ function eigen_forward(AB)
     return ComponentVector(; s, V)
 end
 
-const _diff_eigen = ImplicitFunction(eigen_forward, eigen_conditions, DirectLinearSolver())
+const _diff_eigen =
+    ImplicitFunction(eigen_forward, eigen_conditions, DirectLinearSolver(), nothing)
 function diff_eigen(A)
     (; s, V) = _diff_eigen(comp_vec(A))
     return (; s, V)
@@ -128,7 +128,8 @@ function schur_forward(A)
     (; Z, T) = schur_res
     return ComponentVector(; Z, T)
 end
-const _diff_schur = ImplicitFunction(schur_forward, schur_conditions, DirectLinearSolver())
+const _diff_schur =
+    ImplicitFunction(schur_forward, schur_conditions, DirectLinearSolver(), nothing)
 
 function bidiag(v1, v2)
     return Bidiagonal(v1, v2, :L)
@@ -159,7 +160,7 @@ function gen_schur_forward(AB)
     return ComponentVector(; left, right, S, T)
 end
 const _diff_gen_schur =
-    ImplicitFunction(gen_schur_forward, gen_schur_conditions, DirectLinearSolver())
+    ImplicitFunction(gen_schur_forward, gen_schur_conditions, DirectLinearSolver(), nothing)
 
 function diff_schur(A, B)
     (; left, right, S, T) = _diff_gen_schur(comp_vec(A, B))
@@ -187,7 +188,8 @@ function svd_forward(A)
     return ComponentVector(; U, S, V)
 end
 
-const _diff_svd = ImplicitFunction(svd_forward, svd_conditions, DirectLinearSolver())
+const _diff_svd =
+    ImplicitFunction(svd_forward, svd_conditions, DirectLinearSolver(), nothing)
 function diff_svd(A)
     (; U, S, V) = _diff_svd(A)
     return (; U, S, V)
